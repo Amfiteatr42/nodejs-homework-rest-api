@@ -66,7 +66,7 @@ const updateContact = async (contactId, body) => {
     return false;
   }
 
-  // If in body.name we receive a data - update contact, otherwise remain prev value.
+  // If in body.name we receive a data - update necessary contact part, otherwise remain prev value.
   const updatedContact = {
     id: contactToChange.id,
     name: body.name ? body.name : contactToChange.name,
