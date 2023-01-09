@@ -34,14 +34,8 @@ const verifyUser = async (body) => {
   return updatedUser;
 };
 
-// const removeToken = async (userId) => {
-//   const user = await User.findById(userId);
-//   if (!user) {
-//     res.status(401).json({ message: "Not authorized" });
-//     return;
-//   }
+const changeSubStatus = async (userId, newSubStatus) => {
+  await User.findByIdAndUpdate(userId, { subscription: newSubStatus });
+};
 
-//   await User.findByIdAndUpdate(userId, { token: null });
-// };
-
-module.exports = { createUser, verifyUser };
+module.exports = { createUser, verifyUser, changeSubStatus };

@@ -8,7 +8,8 @@ const {
 } = require("../services/contacts");
 
 const getContacts = async (req, res, next) => {
-  const contacts = await listContacts();
+  const isFavoritesRequest = req.query.favorite;
+  const contacts = await listContacts(isFavoritesRequest);
   res.set("Content-Type", "application/json").send(contacts);
 };
 

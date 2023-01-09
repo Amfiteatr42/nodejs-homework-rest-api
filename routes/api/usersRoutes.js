@@ -5,6 +5,7 @@ const {
   login,
   logout,
   getCurrentUser,
+  updateSubscription,
 } = require("../../controllers/usersController");
 const { authMiddleware } = require("../../middlwares/authorizationMiddlware");
 
@@ -31,5 +32,6 @@ router.post("/signup", validator(signupAndLoginSchema), signup);
 router.post("/login", validator(signupAndLoginSchema), login);
 router.get("/logout", authMiddleware, logout);
 router.get("/current", authMiddleware, getCurrentUser);
+router.patch("/subscription", authMiddleware, updateSubscription);
 
 module.exports = router;

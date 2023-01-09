@@ -1,4 +1,8 @@
-const { createUser, verifyUser } = require("../services/users");
+const {
+  createUser,
+  verifyUser,
+  changeSubStatus,
+} = require("../services/users");
 const User = require("../services/usersModel");
 
 const signup = async (req, res, next) => {
@@ -58,4 +62,26 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, login, logout, getCurrentUser };
+const updateSubscription = async (req, res, next) => {
+  try {
+    const { subscription } = req.body;
+    const { _id } = req.user;
+
+    const matchesAllowedSubs = ["starter", "pro", "business"].includes(
+      subscription
+    );
+    if (!matchesAllowedSubs) {
+      throw new Error(
+        'Subscription status must be one of following values: ["starter", "pro", "business"]'
+      );
+    }
+    changeSubStatus(_id, subscription);
+    res
+      .status(200)
+      .json({ message: "Subscription status has been changed succesfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { signup, login, logout, getCurrentUser, updateSubscription };
