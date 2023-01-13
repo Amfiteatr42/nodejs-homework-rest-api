@@ -1,11 +1,13 @@
 const User = require("./usersModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
 
-const createUser = async (body) => {
-  const user = new User(body);
+const createUser = async (userData) => {
+  const avatarURL = gravatar.url(email);
+  const user = new User({ ...userData, avatarURL });
 
-  const hashedPass = bcrypt.hash(body.password, 10).then((hash) => {
+  const hashedPass = bcrypt.hash(userData.password, 10).then((hash) => {
     return hash;
   });
 
@@ -15,13 +17,13 @@ const createUser = async (body) => {
   return user;
 };
 
-const verifyUser = async (body) => {
-  const user = await User.findOne({ email: body.email });
+const verifyUser = async (userData) => {
+  const user = await User.findOne({ email: userData.email });
   if (!user) {
     return false;
   }
 
-  const match = await bcrypt.compare(body.password, user.password);
+  const match = await bcrypt.compare(userData.password, user.password);
   if (!match) {
     return false;
   }
