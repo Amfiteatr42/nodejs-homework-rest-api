@@ -6,8 +6,10 @@ const {
   logout,
   getCurrentUser,
   updateSubscription,
+  updateAvatar,
 } = require("../../controllers/usersController");
 const { authMiddleware } = require("../../middlwares/authorizationMiddlware");
+const uploads = require("../../middlwares/uploads");
 
 const signupAndLoginSchema = Joi.object({
   email: Joi.string().email({ tlds: { deny: ["ru"] } }),
@@ -33,5 +35,11 @@ router.post("/login", validator(signupAndLoginSchema), login);
 router.get("/logout", authMiddleware, logout);
 router.get("/current", authMiddleware, getCurrentUser);
 router.patch("/subscription", authMiddleware, updateSubscription);
+router.patch(
+  "/avatars",
+  authMiddleware,
+  uploads.single("avatar"),
+  updateAvatar
+);
 
 module.exports = router;
