@@ -1,15 +1,25 @@
-const { createUser, verifyUser, updateUserData } = require("../services/users");
+const {
+  createUser,
+  verifyUser,
+  updateUserData,
+  sendVerificationEmail,
+} = require("../services/users");
 const User = require("../services/usersModel");
 var Jimp = require("jimp");
 const fs = require("fs").promises;
 
 const signup = async (req, res, next) => {
   try {
-    const { email, subscription } = await createUser(req.body);
+    const { email, subscription, verificationToken } = await createUser(
+      req.body
+    );
+
+    sendVerificationEmail(email, verificationToken);
+
     res.status(201).json({
       user: {
-        email: email,
-        subscription: subscription,
+        email,
+        subscription,
       },
     });
   } catch (error) {
@@ -29,6 +39,11 @@ const login = async (req, res, next) => {
       res.status(401).json({ message: "Email or password is wrong" });
       return;
     }
+    if (!user.verify) {
+      res.status(401).json({ message: "User is not veryfied" });
+      return;
+    }
+
     res.status(200).json({
       token: user.token,
       user: {
@@ -106,6 +121,48 @@ const updateAvatar = async (req, res, next) => {
   }
 };
 
+const emailVerification = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await User.findOneAndUpdate(
+      {
+        verificationToken,
+        verify: false,
+      },
+      { verificationToken: null, verify: true },
+      { new: true }
+    );
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    res.status(200).json({ message: "Verification successful" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const repeatEmailVerification = async (req, res, next) => {
+  const email = req.body.email;
+  try {
+    if (!email) {
+      res.status(400).json({ message: "missing required field email" });
+    }
+    const { verificationToken, verify } = await User.findOne({ email });
+    if (verify) {
+      res.status(400).json({ message: "Verification has already been passed" });
+    }
+
+    sendVerificationEmail(email, verificationToken);
+
+    res.status(200).json({ message: "Verification email sent" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -113,4 +170,6 @@ module.exports = {
   getCurrentUser,
   updateSubscription,
   updateAvatar,
+  emailVerification,
+  repeatEmailVerification,
 };
